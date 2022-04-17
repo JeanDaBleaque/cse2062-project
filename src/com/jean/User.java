@@ -8,8 +8,8 @@ public abstract class User {
     private String address;
     private String password;
     private boolean status;
-    private String created_at;
-    private String updated_at;
+    private String createdAt;
+    private String updatedAt;
     private String role;
     private long id;
 
@@ -21,8 +21,8 @@ public abstract class User {
         this.address = address;
         this.password = password;
         this.status = status;
-        this.created_at = created_at;
-        this.updated_at = updated_at;
+        this.createdAt = created_at;
+        this.updatedAt = updated_at;
         this.role = role;
         this.id = id;
     }
@@ -83,20 +83,20 @@ public abstract class User {
         this.status = status;
     }
 
-    public String getCreated_at() {
-        return created_at;
+    public String getCreatedAt() {
+        return createdAt;
     }
 
-    public void setCreated_at(String created_at) {
-        this.created_at = created_at;
+    public void setCreated_at(String createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public String getUpdated_at() {
-        return updated_at;
+    public String getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setUpdated_at(String updated_at) {
-        this.updated_at = updated_at;
+    public void setUpdated_at(String updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
     public String getRole() {
