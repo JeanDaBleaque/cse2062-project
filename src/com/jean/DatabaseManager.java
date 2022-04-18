@@ -26,7 +26,7 @@ public class DatabaseManager {
         return instance;
     }
 
-    public Student checkUser(long id, String password) {
+    public User checkUser(long id, String password) {
         try {
             PreparedStatement userStatement = connection.prepareStatement("SELECT * FROM users WHERE id = ? AND password = ?");
             userStatement.setLong(1, id);
@@ -34,6 +34,7 @@ public class DatabaseManager {
             ResultSet userResult = userStatement.executeQuery();
             if (userResult.next()) {
                 boolean isStudent = userResult.getString("role").equalsIgnoreCase("student");
+                boolean isInstructor = userResult.getString("role").equalsIgnoreCase("instructor");
                 if (isStudent) {
                     long studentID;
                     studentID = userResult.getLong("id");
@@ -46,6 +47,18 @@ public class DatabaseManager {
                                 userResult.getBoolean("status"), userResult.getString("created_at"), userResult.getString("updated_at"),
                                 userResult.getString("role"), userResult.getLong("id"), studentResult.getFloat("gpa"),
                                 studentResult.getInt("totalCredits"), studentResult.getString("major"), studentResult.getString("expire_at"));
+                    }
+                } else if (isInstructor) {
+                    long instructorID;
+                    instructorID = userResult.getLong("id");
+                    PreparedStatement instructorStatement = connection.prepareStatement("SELECT * FROM instructors WHERE id = ?");
+                    instructorStatement.setLong(1, instructorID);
+                    ResultSet instructorResult = instructorStatement.executeQuery();
+                    if (instructorResult.next()) {
+                        return new Instructor(userResult.getString("name"), userResult.getString("surname"), userResult.getString("email"),
+                                userResult.getString("phone"), userResult.getString("address"), userResult.getString("password"),
+                                userResult.getBoolean("status"), userResult.getString("created_at"), userResult.getString("updated_at"),
+                                userResult.getString("role"), userResult.getLong("id"), instructorResult.getString("prefix"), instructorResult.getString("office_no"), instructorResult.getString("department"));
                     }
                 }
             }

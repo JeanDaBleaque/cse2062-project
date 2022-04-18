@@ -21,4 +21,36 @@ public class Student extends User {
     public void addCourse(StudentCourse course){
         courses.add(course);
     }
+
+    public float getGpa() {
+        return gpa;
+    }
+
+    public void setGpa(float gpa) {
+        this.gpa = gpa;
+    }
+
+    public int getTotalCredits() {
+        return totalCredits;
+    }
+
+    public void setTotalCredits(int totalCredits) {
+        this.totalCredits = totalCredits;
+    }
+
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
+    public String getExpireAt() {
+        return expireAt;
+    }
+
+    public void setExpireAt(String expireAt) {
+        this.expireAt = expireAt;
+    }
 }
