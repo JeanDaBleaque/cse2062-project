@@ -1,13 +1,21 @@
 package com.jean;
 
 public class Course {
-    protected int courseId;
-    protected String courseName;
-    protected int credit;
-    protected int instructorId;
-    protected int pM1; // Midterm1 percentage
-    protected int pM2; // Midterm2 percentage
-    protected int pFinal; // Final percentage
+    private int courseId;
+    private String courseName;
+    private int credit;
+    private float pM1; // Midterm1 percentage
+    private float pM2; // Midterm2 percentage
+    private float pFinal; // Final percentage
+
+    public Course (int courseId, String courseName, int credit, float pM1, float pM2, float pFinal) {
+        this.courseId = courseId;
+        this.courseName = courseName;
+        this.credit = credit;
+        this.pM1 = pM1;
+        this.pM2 = pM2;
+        this.pFinal = pFinal;
+    }
 
     public int getCourseId() {
         return courseId;
@@ -33,15 +41,7 @@ public class Course {
         this.credit = credit;
     }
 
-    public int getInstructorId() {
-        return instructorId;
-    }
-
-    public void setInstructorId(int instructorId) {
-        this.instructorId = instructorId;
-    }
-
-    public int getpM1() {
+    public float getpM1() {
         return pM1;
     }
 
@@ -49,7 +49,7 @@ public class Course {
         this.pM1 = pM1;
     }
 
-    public int getpM2() {
+    public float getpM2() {
         return pM2;
     }
 
@@ -57,7 +57,7 @@ public class Course {
         this.pM2 = pM2;
     }
 
-    public int getpFinal() {
+    public float getpFinal() {
         return pFinal;
     }
 

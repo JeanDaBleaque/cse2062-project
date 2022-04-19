@@ -16,6 +16,7 @@ public class Student extends User {
         this.totalCredits = totalCredits;
         this.major = major;
         this.expireAt = expireAt;
+        courses = new ArrayList<>();
     }
 
     public void addCourse(StudentCourse course){
@@ -52,5 +53,14 @@ public class Student extends User {
 
     public void setExpireAt(String expireAt) {
         this.expireAt = expireAt;
+    }
+
+    public ArrayList<StudentCourse> getCourses() {
+        return courses;
+    }
+
+    public void addStudentCourse(StudentCourse course) {
+        if (courses != null) courses.add(course);
+        else System.out.println("Courses is null");
     }
 }

@@ -67,4 +67,83 @@ public class DatabaseManager {
         }
         return null;
     }
+
+    public void addStudent(Student student) {
+        try {
+            PreparedStatement userStatement = connection.prepareStatement("INSERT INTO users (name, surname, email, phone, address, password, status, created_at, updated_at, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            userStatement.setString(1, student.getName());
+            userStatement.setString(2, student.getSurname());
+            userStatement.setString(3, student.getEmail());
+            userStatement.setString(4, student.getPhone());
+            userStatement.setString(5, student.getAddress());
+            userStatement.setString(6, student.getPassword());
+            userStatement.setBoolean(7, student.getStatus());
+            userStatement.setString(8, student.getCreatedAt());
+            userStatement.setString(9, student.getUpdatedAt());
+            userStatement.setString(10, student.getRole());
+            userStatement.executeUpdate();
+            PreparedStatement studentStatement = connection.prepareStatement("INSERT INTO students (gpa, totalCredits, major, expire_at, id) VALUES (?, ?, ?, ?, ?)");
+            studentStatement.setFloat(1, student.getGpa());
+            studentStatement.setInt(2, student.getTotalCredits());
+            studentStatement.setString(3, student.getMajor());
+            studentStatement.setString(4, student.getExpireAt());
+            studentStatement.setLong(5, student.getId());
+            studentStatement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void addInstructor(Instructor instructor) {
+        try {
+            PreparedStatement userStatement = connection.prepareStatement("INSERT INTO users (name, surname, email, phone, address, password, status, created_at, updated_at, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            userStatement.setString(1, instructor.getName());
+            userStatement.setString(2, instructor.getSurname());
+            userStatement.setString(3, instructor.getEmail());
+            userStatement.setString(4, instructor.getPhone());
+            userStatement.setString(5, instructor.getAddress());
+            userStatement.setString(6, instructor.getPassword());
+            userStatement.setBoolean(7, instructor.getStatus());
+            userStatement.setString(8, instructor.getCreatedAt());
+            userStatement.setString(9, instructor.getUpdatedAt());
+            userStatement.setString(10, instructor.getRole());
+            userStatement.executeUpdate();
+            PreparedStatement instructorStatement = connection.prepareStatement("INSERT INTO instructors (prefix, office_no, department, id) VALUES (?, ?, ?, ?)");
+            instructorStatement.setString(1, instructor.getPrefix());
+            instructorStatement.setString(2, instructor.getOffice());
+            instructorStatement.setString(3, instructor.getDepartment());
+            instructorStatement.setLong(4, instructor.getId());
+            instructorStatement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getStudentCourses(Student student) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM s_courses WHERE student_id=?");
+            statement.setLong(1, student.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                StudentCourse studentCourse = new StudentCourse(resultSet.getInt("course_id"), resultSet.getInt("midterm1"), resultSet.getInt("midterm2"), resultSet.getInt("final"));
+                student.addStudentCourse(studentCourse);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void getCourses(Instructor instructor) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM courses WHERE instructor_id=?");
+            statement.setLong(1, instructor.getId());
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Course course = new Course(resultSet.getInt("course_id"), resultSet.getString("course_name"), resultSet.getInt("credit"), resultSet.getFloat("percentMidterm1"), resultSet.getFloat("percentMidterm2"), resultSet.getFloat("percentFinal"));
+                instructor.addCourse(course);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
