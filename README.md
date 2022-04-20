@@ -1,2 +1,2 @@
-Student Management System made for CSE2062. \n
+Student Management System made for CSE2062.  
 Marmara University 2022.
