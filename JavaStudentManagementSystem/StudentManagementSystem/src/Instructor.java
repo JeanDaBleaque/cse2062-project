@@ -1,4 +1,5 @@
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class Instructor extends User {
 
@@ -6,8 +7,9 @@ public class Instructor extends User {
     private String office;
     private String department;
     private ArrayList<Course> courses;
-    public Instructor(String name, String surname, String email, String phone, String address, String password, boolean status, String created_at, String updated_at, String role, long id, String prefix, String office, String department) {
-        super(name, surname, email, phone, address, password, status, created_at, updated_at, role, id);
+
+    public Instructor(String name, String surname, String email, String phone, String address, String password, boolean status, String created_at, String updated_at, String role, long id, String prefix, String office, String department, University university) {
+        super(name, surname, email, phone, address, password, status, created_at, updated_at, role, id, university);
         this.prefix = prefix;
         this.office = office;
         this.department = department;
@@ -45,5 +47,20 @@ public class Instructor extends User {
     public void addCourse(Course course) {
         if (courses != null) courses.add(course);
         else System.out.println("Courses is null");
+    }
+
+    public ArrayList<Course> findCoursesByName(String name) {
+        ArrayList<Course> coursesToFind = new ArrayList<>();
+        for (Course course : this.courses) {
+            String curCourseName = course.getCourseName();
+            curCourseName = curCourseName.toLowerCase();
+            if (curCourseName.contains(name)) coursesToFind.add(course);
+        }
+        return coursesToFind;
+    }
+
+    @Override
+    public String toString() {
+        return getId() + " - " + getName();
     }
 }

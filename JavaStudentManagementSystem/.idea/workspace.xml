@@ -10,6 +10,7 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -38,12 +39,15 @@
     <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.SHOW" value="true" />
     <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.WIDTH" value="272" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/StudentManagementSystem/src/images" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\strin\Desktop\java_projects\repo\rep_CSE2062\cse2062-project\cse2062-project\JavaStudentManagementSystem\StudentManagementSystem\src\images" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\strin\Desktop\JavaStudentManagementSystem\StudentManagementSystem\src" />
     </key>
@@ -73,6 +77,8 @@
       <workItem from="1650407382623" duration="36000" />
       <workItem from="1650407497114" duration="7458000" />
       <workItem from="1650420047668" duration="20000" />
+      <workItem from="1650472638657" duration="6884000" />
+      <workItem from="1650484794569" duration="16038000" />
     </task>
     <servers />
   </component>

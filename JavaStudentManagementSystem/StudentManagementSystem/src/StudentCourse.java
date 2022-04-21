@@ -53,7 +53,7 @@ public class StudentCourse {
     }
 
     public void calculateGrade(Course course) {
-        if (course.getCourseId() == getCourseId()) {
+        if (course.getCourseId().equals(getCourseId())) {
             float grade = course.getpM1()*getMidterm1()+course.getpM2()*getMidterm2()+course.getpFinal()*getFinalExam();
             if (grade >= 90) {
                 letterGrade = "AA";

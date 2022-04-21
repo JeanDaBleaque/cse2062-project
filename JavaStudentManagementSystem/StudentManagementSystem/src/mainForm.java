@@ -1,9 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class mainForm extends JFrame {
     private JPanel pnlFirst;
@@ -64,8 +63,6 @@ public class mainForm extends JFrame {
     private JTextField tfAddCourseM1P;
     private JTextField tfAddCourseM2P;
     private JTextField tfAddCourseFinalP;
-    private JComboBox comboBoxDelCourse;
-    private JButton btnDelCourse;
     private JButton btnAddCourse;
     private JButton btnCourseAddclear;
     private JTextField tfEditCourseID;
@@ -74,7 +71,7 @@ public class mainForm extends JFrame {
     private JTextField tfEditCourseCredit;
     private JTextField tfEditCourseM1P;
     private JTextField tfEditCourseM2P;
-    private JLabel tfEditCourseFP;
+    private JLabel lbEditCourseFP;
     private JPanel pnlStudentGrades;
     private JPanel pageStudentGrades;
     private JComboBox comboBoxGradeCourse;
@@ -85,15 +82,28 @@ public class mainForm extends JFrame {
     private JTextField tfGradeLetter;
     private JButton btnGradeChange;
     private JLabel imgPhoto;
+    private JTable courseListTable;
+    private JTextField tfCourseNameList;
+    private JLabel lbCourseNameList;
+    private JTable courseDeleteTable;
+    private JLabel lbDelCourseName;
+    private JTextField tfDelCourseName;
+    private JButton btnDelCourse;
+    private JComboBox comboBoxEditCourse;
+    private JComboBox comboBoxEditCourseInstructor;
+    private JTextField tfEditCourseFP;
+    private JButton btnEditCourseCommit;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
     private Color errorEnter = new Color(205, 24, 48);
     private Color errorCorrection = new Color(170, 170, 170);
-    private CardLayout c1 = (CardLayout)pnlMain.getLayout();
-    private CardLayout c2 = (CardLayout)pnlCourseMain.getLayout();
-    private CardLayout c3 = (CardLayout)pnlStudentMain.getLayout();
+    private CardLayout c1 = (CardLayout) pnlMain.getLayout();
+    private CardLayout c2 = (CardLayout) pnlCourseMain.getLayout();
+    private CardLayout c3 = (CardLayout) pnlStudentMain.getLayout();
 
-    public mainForm(User u1){
+    public mainForm(User u1) {
+        Instructor instructor = (Instructor) u1;
+        DatabaseManager manager = DatabaseManager.getInstance();
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
@@ -107,9 +117,11 @@ public class mainForm extends JFrame {
         }
         lbPrefix.setText(((Instructor) u1).getPrefix());
         lbNameSide.setText(u1.getName() + " " + u1.getSurname());
-        imgPhoto.setIcon(new ImageIcon(new ImageIcon(this.getClass().getResource(u1.getId() + ".png")).getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT)));
+        System.out.println(u1.getId());
+        imgPhoto.setIcon(new ImageIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(u1.getId() + ".png"))).getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT)));
+
         setContentPane(pnlSplitMain);
-        setSize(1200,700);
+        setSize(1200, 700);
         setTitle("Student Management System");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setVisible(true);
@@ -120,14 +132,16 @@ public class mainForm extends JFrame {
         sidePnlCourse.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                    c1.show(pnlMain,"Card2");
-                    c2.show(pnlCourseMain,"Card1");
+                c1.show(pnlMain, "Card2");
+                c2.show(pnlCourseMain, "Card1");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 sidePnlCourse.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 sidePnlCourse.setBackground(sideBarColorNormal);
@@ -137,14 +151,16 @@ public class mainForm extends JFrame {
         sidePnlStudent.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c1.show(pnlMain,"Card3");
-                c3.show(pnlStudentMain,"Card2");
+                c1.show(pnlMain, "Card3");
+                c3.show(pnlStudentMain, "Card2");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 sidePnlStudent.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 sidePnlStudent.setBackground(sideBarColorNormal);
@@ -157,11 +173,13 @@ public class mainForm extends JFrame {
                 mainForm.this.dispose();
                 new loginForm();
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 sidePnlExit.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 sidePnlExit.setBackground(sideBarColorNormal);
@@ -171,13 +189,15 @@ public class mainForm extends JFrame {
         pnlCourseAdd.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c2.show(pnlCourseMain,"Card3");
+                c2.show(pnlCourseMain, "Card3");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlCourseAdd.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlCourseAdd.setBackground(sideBarColorNormal);
@@ -187,13 +207,18 @@ public class mainForm extends JFrame {
         pnlCourseList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c2.show(pnlCourseMain,"Card2");
+                manager.getCourses(instructor);
+                CourseTableModel ctm = new CourseTableModel(instructor, instructor.getCourses());
+                courseListTable.setModel(ctm);
+                c2.show(pnlCourseMain, "Card2");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlCourseList.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlCourseList.setBackground(sideBarColorNormal);
@@ -203,13 +228,18 @@ public class mainForm extends JFrame {
         pnlCourseDelete.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c2.show(pnlCourseMain,"Card4");
+                manager.getCourses(instructor);
+                CourseTableModel ctm = new CourseTableModel(instructor, instructor.getCourses());
+                courseDeleteTable.setModel(ctm);
+                c2.show(pnlCourseMain, "Card4");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlCourseDelete.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlCourseDelete.setBackground(sideBarColorNormal);
@@ -219,13 +249,33 @@ public class mainForm extends JFrame {
         pnlCourseEdit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c2.show(pnlCourseMain,"Card5");
+                University university = instructor.getUniversity();
+                ArrayList<Instructor> instructors = manager.getInstructors(university.getId());
+                manager.getCourses(instructor);
+                comboBoxEditCourse.removeAllItems();
+                comboBoxEditCourseInstructor.removeAllItems();
+                for (Course c : instructor.getCourses()) {
+                    comboBoxEditCourse.addItem(c);
+                }
+                for (Instructor i : instructors) {
+                    comboBoxEditCourseInstructor.addItem(i);
+                }
+
+                for (int i = 0; i < comboBoxEditCourseInstructor.getItemCount(); i++) {
+                    if (((Instructor) comboBoxEditCourseInstructor.getItemAt(i)).getId() == instructor.getId()) {
+                        comboBoxEditCourseInstructor.setSelectedIndex(i);
+                    }
+                }
+
+                c2.show(pnlCourseMain, "Card5");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlCourseEdit.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlCourseEdit.setBackground(sideBarColorNormal);
@@ -249,13 +299,15 @@ public class mainForm extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
 
-                c3.show(pnlStudentMain,"Card1");
+                c3.show(pnlStudentMain, "Card1");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlStudentAdd.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlStudentAdd.setBackground(sideBarColorNormal);
@@ -265,13 +317,15 @@ public class mainForm extends JFrame {
         pnlStudentList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c3.show(pnlStudentMain,"Card3");
+                c3.show(pnlStudentMain, "Card3");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlStudentList.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlStudentList.setBackground(sideBarColorNormal);
@@ -281,13 +335,15 @@ public class mainForm extends JFrame {
         pnlStudentDelete.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c3.show(pnlStudentMain,"Card4");
+                c3.show(pnlStudentMain, "Card4");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlStudentDelete.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlStudentDelete.setBackground(sideBarColorNormal);
@@ -297,13 +353,15 @@ public class mainForm extends JFrame {
         pnlStudentEdit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c3.show(pnlStudentMain,"Card5");
+                c3.show(pnlStudentMain, "Card5");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlStudentEdit.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlStudentEdit.setBackground(sideBarColorNormal);
@@ -313,13 +371,15 @@ public class mainForm extends JFrame {
         pnlStudentGrades.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                c3.show(pnlStudentMain,"Card6");
+                c3.show(pnlStudentMain, "Card6");
             }
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 pnlStudentGrades.setBackground(sideBarColorHover);
 
             }
+
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlStudentGrades.setBackground(sideBarColorNormal);
@@ -327,7 +387,171 @@ public class mainForm extends JFrame {
             }
         });
 
+        tfCourseNameList.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String courseName = tfCourseNameList.getText();
+                courseName = courseName.toLowerCase();
+                ArrayList<Course> courses = null;
 
+                if (courseName != null && courseName.trim().length() > 0) {
+                    courses = instructor.findCoursesByName(courseName);
+                } else {
+                    courses = instructor.getCourses();
+                }
+                CourseTableModel curModel = new CourseTableModel(instructor, courses);
+                courseListTable.setModel(curModel);
+            }
+        });
+
+        btnAddCourse.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (tfAddCourseID.getText().equals("") || tfAddCourseName.getText().equals("") || tfAddCourseCredit.getText().equals("") || tfAddCourseM1P.getText().equals("") || tfAddCourseM2P.getText().equals("") || tfAddCourseFinalP.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the fields!");
+                } else {
+                    try {
+                        int credit = Integer.parseInt(tfAddCourseCredit.getText());
+                        float m1p = Float.parseFloat(tfAddCourseM1P.getText());
+                        float m2p = Float.parseFloat(tfAddCourseM2P.getText());
+                        float finalp = Float.parseFloat(tfAddCourseFinalP.getText());
+                        if (credit < 0 || m1p < 0 || m2p < 0 || finalp < 0) {
+                            JOptionPane.showMessageDialog(null, "Please enter positive numbers!");
+                        } else if (m1p+m2p+finalp != 1f) {
+                            JOptionPane.showMessageDialog(null, "Please enter valid percentages!");
+                        } else {
+                            Course courseToAdd = new Course(tfAddCourseID.getText(), tfAddCourseName.getText(), credit, m1p, m2p, finalp, instructor);
+                            boolean added = manager.addCourse(courseToAdd);
+                            if (added) {
+                                tfAddCourseID.setText("");
+                                tfAddCourseName.setText("");
+                                tfAddCourseCredit.setText("");
+                                tfAddCourseM1P.setText("");
+                                tfAddCourseM2P.setText("");
+                                tfAddCourseFinalP.setText("");
+                                JOptionPane.showMessageDialog(null, "Course added successfully!");
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Course addition failed!");
+                            }
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Please enter integers for credits and float for percentages!");
+                    }
+                }
+            }
+        });
+        btnCourseAddclear.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tfAddCourseID.setText("");
+                tfAddCourseName.setText("");
+                tfAddCourseCredit.setText("");
+                tfAddCourseM1P.setText("");
+                tfAddCourseM2P.setText("");
+                tfAddCourseFinalP.setText("");
+            }
+        });
+
+        tfDelCourseName.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String courseName = tfDelCourseName.getText();
+                courseName = courseName.toLowerCase();
+                ArrayList<Course> courses = null;
+                if (courseName != null && courseName.trim().length() > 0) {
+                    courses = instructor.findCoursesByName(courseName);
+                } else {
+                    courses = instructor.getCourses();
+                }
+                CourseTableModel curModel = new CourseTableModel(instructor, courses);
+                courseDeleteTable.setModel(curModel);
+            }
+        });
+        btnDelCourse.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = courseDeleteTable.getSelectedRow();
+                if (selectedRow < 0) {
+                    JOptionPane.showMessageDialog(null, "Please select a course to delete!");
+                } else {
+                    int result = JOptionPane.showConfirmDialog(null, "Are you sure to delete this course?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        String courseToDelId = (String) courseDeleteTable.getValueAt(selectedRow, 0);
+                        Course courseToDel = null;
+                        for (Course course : instructor.getCourses()) {
+                            if (course.getCourseId().equalsIgnoreCase(courseToDelId)) {
+                                courseToDel = course;
+                                break;
+                            }
+                        }
+                        boolean deleted = manager.deleteCourse(courseToDel);
+                        if (deleted) {
+                            JOptionPane.showMessageDialog(null, "Course deleted successfully!");
+                            tfDelCourseName.setText("");
+                            manager.getCourses(instructor);
+                            CourseTableModel curModel = new CourseTableModel(instructor, instructor.getCourses());
+                            courseDeleteTable.setModel(curModel);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Course deletion failed!");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Course deletion cancelled!");
+                    }
+                }
+            }
+        });
+        comboBoxEditCourse.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Course selectedCourse = (Course) comboBoxEditCourse.getSelectedItem();
+                if (selectedCourse != null) {
+                    tfEditCourseID.setText(selectedCourse.getCourseId());
+                    tfEditCourseName.setText(selectedCourse.getCourseName());
+                    //iterate combobox
+                    for (int i = 0; i < comboBoxEditCourseInstructor.getItemCount(); i++) {
+                        if (((Instructor) comboBoxEditCourseInstructor.getItemAt(i)).getId() == instructor.getId()) {
+                            comboBoxEditCourseInstructor.setSelectedIndex(i);
+                        }
+                    }
+                    tfEditCourseCredit.setText(String.valueOf(selectedCourse.getCredit()));
+                    tfEditCourseM1P.setText(String.valueOf(selectedCourse.getpM1()));
+                    tfEditCourseM2P.setText(String.valueOf(selectedCourse.getpM2()));
+                    tfEditCourseFP.setText(String.valueOf(selectedCourse.getpFinal()));
+                }
+            }
+        });
+        btnEditCourseCommit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (tfEditCourseID.getText().equals("") || tfEditCourseName.getText().equals("") || tfEditCourseCredit.getText().equals("") || tfEditCourseM1P.getText().equals("") || tfEditCourseM2P.getText().equals("") || tfEditCourseFP.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the fields!");
+                } else {
+                    try {
+                        int credit = Integer.parseInt(tfEditCourseCredit.getText());
+                        float m1p = Float.parseFloat(tfEditCourseM1P.getText());
+                        float m2p = Float.parseFloat(tfEditCourseM2P.getText());
+                        float finalp = Float.parseFloat(tfEditCourseFP.getText());
+                        if (credit < 0 || m1p < 0 || m2p < 0 || finalp < 0) {
+                            JOptionPane.showMessageDialog(null, "Please enter positive numbers!");
+                        } else if (m1p+m2p+finalp != 1f) {
+                            JOptionPane.showMessageDialog(null, "Please enter valid percentages!");
+                        } else {
+                            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to commit the changes?", "Confirm", JOptionPane.YES_NO_OPTION);
+                            if (result == JOptionPane.YES_OPTION) {
+                                Course courseToEdit = new Course(tfEditCourseID.getText(), tfEditCourseName.getText(), credit, m1p, m2p, finalp, (Instructor) comboBoxEditCourseInstructor.getSelectedItem());
+                                boolean updated = manager.editCourses(courseToEdit, ((Course)comboBoxEditCourse.getSelectedItem()).getCourseId());
+                                if (updated) {
+                                    JOptionPane.showMessageDialog(null, "Course updated successfully!");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Course update failed!");
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Course editing cancelled!");
+                            }
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Please enter integers for credits and float for percentages!");
+                    }
+                }
+            }
+        });
     }
-
 }

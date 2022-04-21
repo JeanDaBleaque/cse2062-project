@@ -10,8 +10,9 @@ public abstract class User {
     private String updatedAt;
     private String role;
     private long id;
+    private University university;
 
-    public User (String name, String surname, String email, String phone, String address, String password, boolean status, String created_at, String updated_at, String role, long id) {
+    public User (String name, String surname, String email, String phone, String address, String password, boolean status, String created_at, String updated_at, String role, long id, University university) {
         this.name = name;
         this.surname = surname;
         this.email = email;
@@ -23,6 +24,7 @@ public abstract class User {
         this.updatedAt = updated_at;
         this.role = role;
         this.id = id;
+        this.university = university;
     }
 
     public String getName() {
@@ -111,5 +113,13 @@ public abstract class User {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public University getUniversity() {
+        return university;
+    }
+
+    public void setUniversity(University university) {
+        this.university = university;
     }
 }

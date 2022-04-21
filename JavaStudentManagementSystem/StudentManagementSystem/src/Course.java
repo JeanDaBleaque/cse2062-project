@@ -1,25 +1,30 @@
+import java.util.ArrayList;
+
 public class Course {
-    private int courseId;
+
+    private String courseId;
     private String courseName;
     private int credit;
     private float pM1; // Midterm1 percentage
     private float pM2; // Midterm2 percentage
     private float pFinal; // Final percentage
+    private Instructor instructor;
 
-    public Course (int courseId, String courseName, int credit, float pM1, float pM2, float pFinal) {
+    public Course (String courseId, String courseName, int credit, float pM1, float pM2, float pFinal, Instructor instructor) {
         this.courseId = courseId;
         this.courseName = courseName;
         this.credit = credit;
         this.pM1 = pM1;
         this.pM2 = pM2;
         this.pFinal = pFinal;
+        this.instructor = instructor;
     }
 
-    public int getCourseId() {
+    public String getCourseId() {
         return courseId;
     }
 
-    public void setCourseId(int courseId) {
+    public void setCourseId(String courseId) {
         this.courseId = courseId;
     }
 
@@ -59,7 +64,20 @@ public class Course {
         return pFinal;
     }
 
-    public void setpFinal(int pGinal) {
-        this.pFinal = pGinal;
+    public void setpFinal(int pFinal) {
+        this.pFinal = pFinal;
+    }
+
+    public Instructor getInstructor() {
+        return instructor;
+    }
+
+    public void setInstructor(Instructor instructor) {
+        this.instructor = instructor;
+    }
+
+    @Override
+    public String toString() {
+        return courseId + " - " + courseName;
     }
 }

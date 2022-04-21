@@ -45,6 +45,8 @@ public class loginForm extends JFrame{
     private JTextField tfPrefix;
     private JTextField tfOffice;
     private JComboBox comboBoxDepartment;
+    private JComboBox comboBoxInstructorMail;
+    private JComboBox comboBoxUniversity;
     private JLabel lbWarning;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
@@ -53,22 +55,21 @@ public class loginForm extends JFrame{
     private CardLayout c1 = (CardLayout)enterCardPane.getLayout();
 
     public loginForm() {
-        ArrayList<Department> departments = manager.getDepartments();
-        Iterator it = departments.iterator();
-        while (it.hasNext()) {
-            comboBoxDepartment.addItem(((Department) it.next()).getDepartmentName());
+        ArrayList<University> universities = manager.getUniversities();
+        Iterator it1 = universities.iterator();
+
+        while (it1.hasNext()) {
+            University university = (University) it1.next();
+            university.setDepartments(manager.getDepartments(university.getId()));
+            comboBoxInstructorMail.addItem("@" + university.getInstructorPostFix());
+            comboBoxUniversity.addItem(university);
+            Iterator it2 = university.getDepartments().iterator();
+            while (it2.hasNext()) {
+                Department department = (Department) it2.next();
+                comboBoxDepartment.addItem(department.getDepartmentName());
+            }
         }
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
-        }
+
         setContentPane(mainFirstPane);
         setSize(1200,700);
         setTitle("Student Management System");
@@ -127,7 +128,7 @@ public class loginForm extends JFrame{
                 if (tfLogUser.getText().equals("") || pfLogPassword.getText().equals("")) {
                     JOptionPane.showMessageDialog(null, "Please fill all fields", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    User u1 = manager.checkUser(Long.parseLong(tfLogUser.getText()), pfLogPassword.getText());
+                    User u1 = manager.checkUser(Long.parseLong(tfLogUser.getText()), pfLogPassword.getText(), ((University)comboBoxUniversity.getSelectedItem()).getId());
                     if (u1 != null) {
                         if (u1.getStatus()) {
                             loginForm.this.dispose();
@@ -161,9 +162,9 @@ public class loginForm extends JFrame{
                     Date currentDate = new Date();
                     String created_at = simpleDateFormat.format(currentDate);
                     long id = currentDate.getTime();
-                    boolean registration = manager.addInstructor(new Instructor(tfNameReg.getText(), tfSurnameReg.getText(), tfMailReg.getText(), tfPhoneReg.getText(),
+                    boolean registration = manager.addInstructor(new Instructor(tfNameReg.getText(), tfSurnameReg.getText(), tfMailReg.getText() + comboBoxInstructorMail.getSelectedItem(), tfPhoneReg.getText(),
                             tfAddressReg.getText(), pfPasswordReg.getText(), true, created_at, created_at, "instructor", id,
-                            tfPrefix.getText(), tfOffice.getText(), (String) comboBoxDepartment.getSelectedItem()));
+                            tfPrefix.getText(), tfOffice.getText(), (String) comboBoxDepartment.getSelectedItem(), universities.get(comboBoxInstructorMail.getSelectedIndex())));
                     if (registration) {
                         tfNameReg.setText("");
                         tfSurnameReg.setText("");
@@ -195,6 +196,18 @@ public class loginForm extends JFrame{
                 tfPrefix.setText("");
                 tfOffice.setText("");
                 comboBoxDepartment.setSelectedIndex(0);
+            }
+        });
+        comboBoxInstructorMail.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                comboBoxDepartment.removeAllItems();
+                University curUniversity = universities.get(comboBoxInstructorMail.getSelectedIndex());
+                Iterator it3 = curUniversity.getDepartments().iterator();
+                while (it3.hasNext()) {
+                    Department curDepartment = (Department) it3.next();
+                    comboBoxDepartment.addItem(curDepartment.getDepartmentName());
+                }
             }
         });
     }
