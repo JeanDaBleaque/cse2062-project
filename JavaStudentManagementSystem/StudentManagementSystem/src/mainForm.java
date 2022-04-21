@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Objects;
 
 public class mainForm extends JFrame {
@@ -39,11 +41,8 @@ public class mainForm extends JFrame {
     private JTextField tfAddStMail;
     private JTextField tfAddStPhone;
     private JTextField tfAddStAddress;
-    private JTextField tfAddStPassword;
     private JButton addStudentButton;
     private JButton clearButton;
-    private JButton btnStDelele;
-    private JLabel lbStDelNotification;
     private JTextField tfStEditName;
     private JTextField tfStEditSurname;
     private JTextField tfStEditMail;
@@ -51,7 +50,6 @@ public class mainForm extends JFrame {
     private JTextField tfStEditAddress;
     private JTextField tfStEditPassword;
     private JButton commitChangesButton;
-    private JComboBox comboBoxDelStudent;
     private JComboBox comboBoxStEdit;
     private JPanel pageAddCourse;
     private JPanel pageDelCourse;
@@ -93,6 +91,20 @@ public class mainForm extends JFrame {
     private JComboBox comboBoxEditCourseInstructor;
     private JTextField tfEditCourseFP;
     private JButton btnEditCourseCommit;
+    private JLabel lbMajor;
+    private JTextField tfAddStMajor;
+    private JPasswordField tfAddStPassword;
+    private JLabel lbStudentPostFix;
+    private JComboBox comboBoxDepartment;
+    private JTable tableStudentList;
+    private JTextField tfStudentListName;
+    private JButton btnStDelete;
+    private JTable tableStudentDeleteList;
+    private JTextField tfStudentDeleteName;
+    private JLabel lbEditStudentMail;
+    private JComboBox comboBoxStEditDepartment;
+    private JTextField tfStEditMajor;
+    private JScrollPane table;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
     private Color errorEnter = new Color(205, 24, 48);
@@ -298,7 +310,14 @@ public class mainForm extends JFrame {
         pnlStudentAdd.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-
+                lbStudentPostFix.setText("@" + instructor.getUniversity().getStudentPostFix());
+                University university = instructor.getUniversity();
+                university.setDepartments(manager.getDepartments(university.getId()));
+                ArrayList<Department> departments = university.getDepartments();
+                comboBoxDepartment.removeAllItems();
+                for (Department d : departments) {
+                    comboBoxDepartment.addItem(d);
+                }
                 c3.show(pnlStudentMain, "Card1");
             }
 
@@ -317,6 +336,9 @@ public class mainForm extends JFrame {
         pnlStudentList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                ArrayList<Student> students = manager.getStudents(instructor.getUniversity().getId());
+                StudentTableModel stm = new StudentTableModel(instructor, students);
+                tableStudentList.setModel(stm);
                 c3.show(pnlStudentMain, "Card3");
             }
 
@@ -335,6 +357,9 @@ public class mainForm extends JFrame {
         pnlStudentDelete.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                ArrayList<Student> students = manager.getStudents(instructor.getUniversity().getId());
+                StudentTableModel stm = new StudentTableModel(instructor, students);
+                tableStudentDeleteList.setModel(stm);
                 c3.show(pnlStudentMain, "Card4");
             }
 
@@ -353,6 +378,19 @@ public class mainForm extends JFrame {
         pnlStudentEdit.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                University university = instructor.getUniversity();
+                university.setDepartments(manager.getDepartments(university.getId()));
+                ArrayList<Department> departments = university.getDepartments();
+                ArrayList<Student> students = manager.getStudents(instructor.getUniversity().getId());
+                lbEditStudentMail.setText("@" + instructor.getUniversity().getStudentPostFix());
+                comboBoxStEdit.removeAllItems();
+                comboBoxStEditDepartment.removeAllItems();
+                for (Student s : students) {
+                    comboBoxStEdit.addItem(s);
+                }
+                for (Department d : departments) {
+                    comboBoxStEditDepartment.addItem(d);
+                }
                 c3.show(pnlStudentMain, "Card5");
             }
 
@@ -505,7 +543,6 @@ public class mainForm extends JFrame {
                 if (selectedCourse != null) {
                     tfEditCourseID.setText(selectedCourse.getCourseId());
                     tfEditCourseName.setText(selectedCourse.getCourseName());
-                    //iterate combobox
                     for (int i = 0; i < comboBoxEditCourseInstructor.getItemCount(); i++) {
                         if (((Instructor) comboBoxEditCourseInstructor.getItemAt(i)).getId() == instructor.getId()) {
                             comboBoxEditCourseInstructor.setSelectedIndex(i);
@@ -549,6 +586,195 @@ public class mainForm extends JFrame {
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(null, "Please enter integers for credits and float for percentages!");
+                    }
+                }
+            }
+        });
+        addStudentButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (tfAddStName.getText().equals("") || tfAddStSurname.getText().equals("") || tfAddStMail.getText().equals("") || tfAddStPhone.getText().equals("") || tfAddStAddress.getText().equals("") || tfAddStPassword.getText().equals("") || tfAddStMajor.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the fields!");
+                } else {
+                    try {
+                        long phone = Long.parseLong(tfAddStPhone.getText());
+                        if (phone < 0) {
+                            JOptionPane.showMessageDialog(null, "Please enter valid phone number!");
+                        } else {
+                            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to add the student?", "Confirm", JOptionPane.YES_NO_OPTION);
+                            if (result == JOptionPane.YES_OPTION) {
+                                String pattern = "MM-dd-yyyy";
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+                                Date currentDate = new Date();
+                                String created_at = simpleDateFormat.format(currentDate);
+                                long id = currentDate.getTime();
+                                currentDate.setYear(currentDate.getYear() + 7);
+                                String expire_at = simpleDateFormat.format(currentDate);
+                                Student studentToAdd = new Student(tfAddStName.getText(), tfAddStSurname.getText(), tfAddStMail.getText() + "@" + instructor.getUniversity().getStudentPostFix(),
+                                        tfAddStPhone.getText(), tfAddStAddress.getText(), tfAddStPassword.getText(), true, created_at,
+                                        created_at, "student", id, 0, 0, tfAddStMajor.getText(), expire_at,
+                                        instructor.getUniversity(), ((Department)comboBoxDepartment.getSelectedItem()).getDepartmentName());
+                                boolean added = manager.addStudent(studentToAdd);
+                                if (added) {
+                                    tfAddStName.setText("");
+                                    tfAddStSurname.setText("");
+                                    tfAddStMail.setText("");
+                                    tfAddStPhone.setText("");
+                                    tfAddStAddress.setText("");
+                                    tfAddStPassword.setText("");
+                                    tfAddStMajor.setText("");
+                                    JOptionPane.showMessageDialog(null, "Student added successfully!");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Student adding failed!");
+                                }
+                            }
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Please enter valid phone number!");
+                    }
+                }
+            }
+        });
+
+        clearButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                tfAddStName.setText("");
+                tfAddStSurname.setText("");
+                tfAddStMail.setText("");
+                tfAddStPhone.setText("");
+                tfAddStAddress.setText("");
+                tfAddStPassword.setText("");
+                tfAddStMajor.setText("");
+            }
+        });
+
+        tfStudentListName.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String studentName = tfStudentListName.getText();
+                studentName = studentName.toLowerCase();
+                ArrayList<Student> students = null;
+
+                if (studentName != null && studentName.trim().length() > 0) {
+                    students = manager.findStudentsByName(studentName, manager.getStudents(instructor.getUniversity().getId()));
+                } else {
+                    students = manager.getStudents(instructor.getUniversity().getId());
+                }
+
+                StudentTableModel curModel = new StudentTableModel(instructor, students);
+                tableStudentList.setModel(curModel);
+            }
+        });
+
+        tfStudentDeleteName.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                String studentName = tfStudentDeleteName.getText();
+                studentName = studentName.toLowerCase();
+                ArrayList<Student> students = null;
+
+                if (studentName != null && studentName.trim().length() > 0) {
+                    students = manager.findStudentsByName(studentName, manager.getStudents(instructor.getUniversity().getId()));
+                } else {
+                    students = manager.getStudents(instructor.getUniversity().getId());
+                }
+
+                StudentTableModel curModel = new StudentTableModel(instructor, students);
+                tableStudentDeleteList.setModel(curModel);
+            }
+        });
+
+
+        comboBoxStEdit.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Student selectedStudent = (Student) comboBoxStEdit.getSelectedItem();
+                if (selectedStudent != null) {
+                    tfStEditName.setText(selectedStudent.getName());
+                    tfStEditSurname.setText(selectedStudent.getSurname());
+                    String[] mail = selectedStudent.getEmail().split("@");
+                    tfStEditMail.setText(mail[0]);
+                    tfStEditPhone.setText(selectedStudent.getPhone());
+                    tfStEditAddress.setText(selectedStudent.getAddress());
+                    tfStEditPassword.setText(selectedStudent.getPassword());
+                    tfStEditMajor.setText(selectedStudent.getMajor());
+                    for (int i = 0; i < comboBoxStEditDepartment.getItemCount(); i++) {
+                        if (comboBoxStEditDepartment.getItemAt(i).equals(selectedStudent)) {
+                            if (((Student) comboBoxStEditDepartment.getItemAt(i)).getDepartment().equalsIgnoreCase(selectedStudent.getDepartment())) {
+                                comboBoxStEditDepartment.setSelectedIndex(i);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        commitChangesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (tfStEditName.getText().equals("") || tfStEditSurname.getText().equals("") || tfStEditMail.getText().equals("") || tfStEditPhone.getText().equals("") || tfStEditAddress.getText().equals("") || tfStEditPassword.getText().equals("") || tfStEditMajor.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the fields!");
+                } else {
+                    try {
+                        long phone = Long.parseLong(tfStEditPhone.getText());
+                        if (phone < 0) {
+                            JOptionPane.showMessageDialog(null, "Please enter valid phone number!");
+                        } else {
+                            int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to commit changes?");
+                            if (result == JOptionPane.YES_OPTION) {
+                                String pattern = "MM-dd-yyyy";
+                                SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+                                Date currentDate = new Date();
+                                String updated_at = simpleDateFormat.format(currentDate);
+                                Student selectedStudent = (Student) comboBoxStEdit.getSelectedItem();
+                                Student updateStudent = new Student(tfStEditName.getText(), tfStEditSurname.getText(),
+                                        tfStEditMail.getText() + "@" + instructor.getUniversity().getStudentPostFix(),
+                                        tfStEditPhone.getText(), tfStEditAddress.getText(), tfStEditPassword.getText(),
+                                        true, selectedStudent.getCreatedAt(), updated_at, "student", selectedStudent.getId(),
+                                        selectedStudent.getGpa(), selectedStudent.getTotalCredits(), tfStEditMajor.getText(), selectedStudent.getExpireAt(),
+                                        instructor.getUniversity(), ((Department) comboBoxStEditDepartment.getSelectedItem()).getDepartmentName());
+                                boolean updated = manager.updateStudent(updateStudent);
+                                if (updated) {
+                                    JOptionPane.showMessageDialog(null, "Changes committed!");
+                                } else {
+                                    JOptionPane.showMessageDialog(null, "Changes not committed!");
+                                }
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Changes not committed!");
+                            }
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Please enter valid phone number!");
+                    }
+                }
+            }
+        });
+        btnStDelete.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int selectedRow = tableStudentDeleteList.getSelectedRow();
+                if (selectedRow < 0) {
+                    JOptionPane.showMessageDialog(null, "Please select a student!");
+                } else {
+                    int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to delete this student?");
+                    if (result == JOptionPane.YES_OPTION) {
+                        Long studentToDeleteId = (Long) tableStudentDeleteList.getValueAt(selectedRow, 0);
+                        Student studentToDelete = null;
+                        for (Student student : manager.getStudents(instructor.getUniversity().getId())) {
+                            if (student.getId() == studentToDeleteId) {
+                                studentToDelete = student;
+                                break;
+                            }
+                        }
+                        boolean deleted = manager.deleteStudent(studentToDelete);
+                        if (deleted) {
+                            JOptionPane.showMessageDialog(null, "Student deleted successfully!");
+                            tfStudentDeleteName.setText("");
+                            StudentTableModel studentTableModel = new StudentTableModel(instructor, manager.getStudents(instructor.getUniversity().getId()));
+                            tableStudentDeleteList.setModel(studentTableModel);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Student deletion failed!");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Student not deleted!");
                     }
                 }
             }

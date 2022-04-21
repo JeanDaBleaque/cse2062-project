@@ -23,4 +23,9 @@ public class Department {
     public void setOverseer_id(long overseer_id) {
         this.overseer_id = overseer_id;
     }
+
+    @Override
+    public String toString() {
+        return departmentName;
+    }
 }

@@ -10,7 +10,6 @@ public class CourseTableModel extends AbstractTableModel {
     private static final int COURSE_MIDTERM1_PERCENT_COL = 4;
     private static final int COURSE_MIDTERM2_PERCENT_COL = 5;
     private static final int COURSE_FINAL_PERCENT_COL = 6;
-    private static final int COURSE = 7;
 
     private String[] columnNames = {"Course ID", "Course Name", "Credit", "Instructor", "Midterm 1 Percent", "Midterm 2 Percent", "Final Percent"};
     private ArrayList<Course> courses;

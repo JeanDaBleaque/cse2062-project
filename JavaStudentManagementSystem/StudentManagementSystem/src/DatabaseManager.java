@@ -68,7 +68,7 @@ public class DatabaseManager {
                                     userResult.getString("phone"), userResult.getString("address"), userResult.getString("password"),
                                     userResult.getBoolean("status"), userResult.getString("created_at"), userResult.getString("updated_at"),
                                     userResult.getString("role"), userResult.getLong("id"), studentResult.getFloat("gpa"),
-                                    studentResult.getInt("totalCredits"), studentResult.getString("major"), studentResult.getString("expire_at"), curUniversity);
+                                    studentResult.getInt("totalCredits"), studentResult.getString("major"), studentResult.getString("expire_at"), curUniversity, studentResult.getString("department"));
                         }
                     } else if (isInstructor) {
                         long instructorID;
@@ -271,6 +271,92 @@ public class DatabaseManager {
             statement.setLong(8, course.getInstructor().getUniversity().getId());
             statement.setString(9, selectedCourse);
             statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public ArrayList<Student> getStudents(long university_id) {
+        ArrayList<Student> students = new ArrayList<>();
+        try {
+            PreparedStatement universityStatement = connection.prepareStatement("SELECT * FROM universities WHERE university_id=?");
+            universityStatement.setLong(1, university_id);
+            ResultSet universityResult = universityStatement.executeQuery();
+            if (universityResult.next()) {
+                University curUniversity = new University(universityResult.getString("university_name"), universityResult.getLong("university_id"), universityResult.getString("studentPostFix"), universityResult.getString("instructorPostFix"));
+                PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE university_id=? AND role='student'");
+                statement.setLong(1, university_id);
+                ResultSet userResult = statement.executeQuery();
+                while (userResult.next()) {
+                    PreparedStatement studentStatement = connection.prepareStatement("SELECT * FROM students WHERE id=?");
+                    studentStatement.setLong(1, userResult.getLong("id"));
+                    ResultSet studentResult = studentStatement.executeQuery();
+                    if (studentResult.next()) {
+                        Student student = new Student(userResult.getString("name"), userResult.getString("surname"), userResult.getString("email"),
+                                userResult.getString("phone"), userResult.getString("address"), userResult.getString("password"),
+                                userResult.getBoolean("status"), userResult.getString("created_at"), userResult.getString("updated_at"),
+                                userResult.getString("role"), userResult.getLong("id"), studentResult.getFloat("gpa"), studentResult.getInt("totalCredits"), studentResult.getString("major"), studentResult.getString("expire_at"), curUniversity, studentResult.getString("department"));
+                        students.add(student);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return students;
+    }
+
+    public ArrayList<Student> findStudentsByName(String name, ArrayList<Student> students) {
+        ArrayList<Student> studentsToFind = new ArrayList<>();
+        for (Student student : students) {
+            String studentName = student.getName();
+            studentName = studentName.toLowerCase();
+            if (studentName.contains(name)) studentsToFind.add(student);
+        }
+        return studentsToFind;
+    }
+
+    public boolean updateStudent(Student student) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("UPDATE users SET name=?, surname=?, email=?, phone=?, address=?, password=?, status=?, created_at=?, updated_at=?, role=?, university_id=? WHERE id=?");
+            statement.setString(1, student.getName());
+            statement.setString(2, student.getSurname());
+            statement.setString(3, student.getEmail());
+            statement.setString(4, student.getPhone());
+            statement.setString(5, student.getAddress());
+            statement.setString(6, student.getPassword());
+            statement.setBoolean(7, student.getStatus());
+            statement.setString(8, student.getCreatedAt());
+            statement.setString(9, student.getUpdatedAt());
+            statement.setString(10, student.getRole());
+            statement.setLong(11, student.getUniversity().getId());
+            statement.setLong(12, student.getId());
+            statement.executeUpdate();
+            PreparedStatement studentStatement = connection.prepareStatement("UPDATE students SET gpa=?, totalCredits=?, major=?, expire_at=?, department=? WHERE id=?");
+            studentStatement.setFloat(1, student.getGpa());
+            studentStatement.setInt(2, student.getTotalCredits());
+            studentStatement.setString(3, student.getMajor());
+            studentStatement.setString(4, student.getExpireAt());
+            studentStatement.setString(5, student.getDepartment());
+            studentStatement.setLong(6, student.getId());
+            studentStatement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean deleteStudent(Student student) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id=?");
+            statement.setLong(1, student.getId());
+            statement.executeUpdate();
+            PreparedStatement studentStatement = connection.prepareStatement("DELETE FROM students WHERE id=?");
+            studentStatement.setLong(1, student.getId());
+            studentStatement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
