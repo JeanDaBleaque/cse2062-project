@@ -1,9 +1,13 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -47,13 +51,14 @@ public class loginForm extends JFrame{
     private JComboBox comboBoxDepartment;
     private JComboBox comboBoxInstructorMail;
     private JComboBox comboBoxUniversity;
+    private JButton btnSelectPhoto;
     private JLabel lbWarning;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
     private Color errorEnter = new Color(205, 24, 48);
     private Color errorCorrection = new Color(170, 170, 170);
     private CardLayout c1 = (CardLayout)enterCardPane.getLayout();
-
+    private String pathPhoto = "";
     public loginForm() {
         ArrayList<University> universities = manager.getUniversities();
         Iterator it1 = universities.iterator();
@@ -176,6 +181,15 @@ public class loginForm extends JFrame{
                         tfPrefix.setText("");
                         tfOffice.setText("");
                         comboBoxDepartment.setSelectedIndex(0);
+                        File source = new File(pathPhoto);
+                        String resourcePath = this.getClass().getResource("").getPath();
+                        File destination = new File(resourcePath + id + ".png");
+                        try {
+                            Files.copy(source.toPath(), destination.toPath());
+                        } catch (Exception ex) {
+                            System.out.println("Error while copying registration photo!");
+                        }
+
                         JOptionPane.showMessageDialog(null, "You have successfully registered.");
                     } else {
                         JOptionPane.showMessageDialog(null, "Registration failed.");
@@ -207,6 +221,20 @@ public class loginForm extends JFrame{
                 while (it3.hasNext()) {
                     Department curDepartment = (Department) it3.next();
                     comboBoxDepartment.addItem(curDepartment.getDepartmentName());
+                }
+            }
+        });
+        btnSelectPhoto.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                FileNameExtensionFilter filter = new FileNameExtensionFilter("*.IMAGE", "png");
+                fileChooser.addChoosableFileFilter(filter);
+                int result = fileChooser.showSaveDialog(null);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    pathPhoto = selectedFile.getAbsolutePath();
                 }
             }
         });

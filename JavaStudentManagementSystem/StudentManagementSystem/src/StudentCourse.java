@@ -1,22 +1,22 @@
 public class StudentCourse {
-    private int courseId;
+    private String courseId;
     private int midterm1; // first midterm grade
     private int midterm2; // second midterm grade
     private int finalExam; // final exam grade
     private String letterGrade;
 
-    public StudentCourse(int courseId, int midterm1, int midterm2, int finalExam) {
+    public StudentCourse(String courseId, int midterm1, int midterm2, int finalExam) {
         this.courseId = courseId;
         this.midterm1 = midterm1;
         this.midterm2 = midterm2;
         this.finalExam = finalExam;
     }
 
-    public int getCourseId() {
+    public String getCourseId() {
         return courseId;
     }
 
-    public void setCourseId(int courseId) {
+    public void setCourseId(String courseId) {
         this.courseId = courseId;
     }
 
@@ -76,6 +76,29 @@ public class StudentCourse {
             }
         } else {
             System.out.println("Course ID does not match");
+        }
+    }
+
+    public static String calculateGrade(Course course, int midterm1, int midterm2, int finalExam) {
+        float grade = course.getpM1()*midterm1+course.getpM2()*midterm2+course.getpFinal()*finalExam;
+        if (grade >= 90) {
+            return "AA";
+        } else if (grade >= 85) {
+            return "BA";
+        } else if (grade >= 80) {
+            return "BB";
+        } else if (grade >= 75) {
+            return "CB";
+        } else if (grade >= 70) {
+            return "CC";
+        } else if (grade >= 65) {
+            return "DC";
+        }  else if (grade >= 60) {
+            return "DD";
+        } else if (grade >= 55) {
+            return "FD";
+        } else {
+            return "FF";
         }
     }
 }

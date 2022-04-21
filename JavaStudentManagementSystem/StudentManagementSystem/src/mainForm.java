@@ -1,6 +1,10 @@
 import javax.swing.*;
+import javax.swing.text.DefaultFormatterFactory;
+import javax.swing.text.NumberFormatter;
+import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.*;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,9 +78,9 @@ public class mainForm extends JFrame {
     private JPanel pageStudentGrades;
     private JComboBox comboBoxGradeCourse;
     private JComboBox comboBoxGradeStudent;
-    private JTextField tfGradeM1;
-    private JTextField tfGradeM2;
-    private JTextField tfGradeFinal;
+    private JFormattedTextField tfGradeM1;
+    private JFormattedTextField tfGradeM2;
+    private JFormattedTextField tfGradeFinal;
     private JTextField tfGradeLetter;
     private JButton btnGradeChange;
     private JLabel imgPhoto;
@@ -104,6 +108,13 @@ public class mainForm extends JFrame {
     private JLabel lbEditStudentMail;
     private JComboBox comboBoxStEditDepartment;
     private JTextField tfStEditMajor;
+    private JPanel pnlStudentEnroll;
+    private JPanel pnlStudentCourseGrades;
+    private JLabel lbStudentCourseStatus;
+    private JPanel pageCourseGrades;
+    private JTextField tfCourseGradesStudentName;
+    private JComboBox comboBoxCourseGrades;
+    private JTable tableCourseGrades;
     private JScrollPane table;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
@@ -130,8 +141,11 @@ public class mainForm extends JFrame {
         lbPrefix.setText(((Instructor) u1).getPrefix());
         lbNameSide.setText(u1.getName() + " " + u1.getSurname());
         System.out.println(u1.getId());
-        imgPhoto.setIcon(new ImageIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(u1.getId() + ".png"))).getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT)));
-
+        try {
+            imgPhoto.setIcon(new ImageIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(u1.getId() + ".png"))).getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT)));
+        } catch (Exception e) {
+            imgPhoto.setIcon(new ImageIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource("user.png"))).getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT)));
+        }
         setContentPane(pnlSplitMain);
         setSize(1200, 700);
         setTitle("Student Management System");
@@ -372,6 +386,31 @@ public class mainForm extends JFrame {
             @Override
             public void mouseExited(MouseEvent e) {
                 pnlStudentDelete.setBackground(sideBarColorNormal);
+            }
+        });
+        pnlStudentCourseGrades.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                manager.getCourses(instructor);
+                ArrayList<Course> courses = instructor.getCourses();
+
+                for (Course c : courses) {
+                    comboBoxCourseGrades.addItem(c);
+                }
+
+                setCourseGradeList(instructor, "");
+                c3.show(pnlStudentMain, "Card7");
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                pnlStudentCourseGrades.setBackground(sideBarColorHover);
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                pnlStudentCourseGrades.setBackground(sideBarColorNormal);
 
             }
         });
@@ -409,6 +448,32 @@ public class mainForm extends JFrame {
         pnlStudentGrades.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                ArrayList<Student> students = manager.getStudents(instructor.getUniversity().getId());
+                manager.getCourses(instructor);
+
+                comboBoxGradeStudent.removeAllItems();
+                comboBoxGradeCourse.removeAllItems();
+
+                for (Student s : students) {
+                    comboBoxGradeStudent.addItem(s);
+                }
+                for (Course c : instructor.getCourses()) {
+                    comboBoxGradeCourse.addItem(c);
+                }
+
+                NumberFormat format = NumberFormat.getInstance();
+                NumberFormatter formatter = new NumberFormatter(format);
+                formatter.setValueClass(Integer.class);
+                formatter.setMinimum(0);
+                formatter.setMaximum(100);
+                DefaultFormatterFactory factory = new DefaultFormatterFactory(formatter);
+
+                tfGradeM1.setFormatterFactory(factory);
+                tfGradeM2.setFormatterFactory(factory);
+                tfGradeFinal.setFormatterFactory(factory);
+
+                setData();
+
                 c3.show(pnlStudentMain, "Card6");
             }
 
@@ -454,7 +519,7 @@ public class mainForm extends JFrame {
                         float finalp = Float.parseFloat(tfAddCourseFinalP.getText());
                         if (credit < 0 || m1p < 0 || m2p < 0 || finalp < 0) {
                             JOptionPane.showMessageDialog(null, "Please enter positive numbers!");
-                        } else if (m1p+m2p+finalp != 1f) {
+                        } else if (m1p + m2p + finalp != 1f) {
                             JOptionPane.showMessageDialog(null, "Please enter valid percentages!");
                         } else {
                             Course courseToAdd = new Course(tfAddCourseID.getText(), tfAddCourseName.getText(), credit, m1p, m2p, finalp, instructor);
@@ -568,13 +633,13 @@ public class mainForm extends JFrame {
                         float finalp = Float.parseFloat(tfEditCourseFP.getText());
                         if (credit < 0 || m1p < 0 || m2p < 0 || finalp < 0) {
                             JOptionPane.showMessageDialog(null, "Please enter positive numbers!");
-                        } else if (m1p+m2p+finalp != 1f) {
+                        } else if (m1p + m2p + finalp != 1f) {
                             JOptionPane.showMessageDialog(null, "Please enter valid percentages!");
                         } else {
                             int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to commit the changes?", "Confirm", JOptionPane.YES_NO_OPTION);
                             if (result == JOptionPane.YES_OPTION) {
                                 Course courseToEdit = new Course(tfEditCourseID.getText(), tfEditCourseName.getText(), credit, m1p, m2p, finalp, (Instructor) comboBoxEditCourseInstructor.getSelectedItem());
-                                boolean updated = manager.editCourses(courseToEdit, ((Course)comboBoxEditCourse.getSelectedItem()).getCourseId());
+                                boolean updated = manager.editCourses(courseToEdit, ((Course) comboBoxEditCourse.getSelectedItem()).getCourseId());
                                 if (updated) {
                                     JOptionPane.showMessageDialog(null, "Course updated successfully!");
                                 } else {
@@ -613,7 +678,7 @@ public class mainForm extends JFrame {
                                 Student studentToAdd = new Student(tfAddStName.getText(), tfAddStSurname.getText(), tfAddStMail.getText() + "@" + instructor.getUniversity().getStudentPostFix(),
                                         tfAddStPhone.getText(), tfAddStAddress.getText(), tfAddStPassword.getText(), true, created_at,
                                         created_at, "student", id, 0, 0, tfAddStMajor.getText(), expire_at,
-                                        instructor.getUniversity(), ((Department)comboBoxDepartment.getSelectedItem()).getDepartmentName());
+                                        instructor.getUniversity(), ((Department) comboBoxDepartment.getSelectedItem()).getDepartmentName());
                                 boolean added = manager.addStudent(studentToAdd);
                                 if (added) {
                                     tfAddStName.setText("");
@@ -779,5 +844,176 @@ public class mainForm extends JFrame {
                 }
             }
         });
+
+        comboBoxGradeStudent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setData();
+            }
+        });
+        comboBoxGradeCourse.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setData();
+            }
+        });
+
+        tfGradeM1.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                setTfGradeLetter();
+            }
+        });
+
+        tfGradeM2.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                setTfGradeLetter();
+            }
+        });
+
+        tfGradeFinal.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                setTfGradeLetter();
+            }
+        });
+
+        btnGradeChange.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Student selectedStudent = (Student) comboBoxGradeStudent.getSelectedItem();
+                Course selectedCourse = (Course) comboBoxGradeCourse.getSelectedItem();
+                StudentCourse selectedStudentCourse = null;
+                for (StudentCourse studentCourse : selectedStudent.getCourses()) {
+                    if (studentCourse.getCourseId().equalsIgnoreCase(selectedCourse.getCourseId())) {
+                        selectedStudentCourse = studentCourse;
+                        break;
+                    }
+                }
+                if (selectedStudentCourse != null) {
+                    int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to change grade for " + selectedStudent.getName() + " in " + selectedCourse.getCourseName() + "?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        selectedStudentCourse.setMidterm1(Integer.parseInt(tfGradeM1.getText()));
+                        selectedStudentCourse.setMidterm2(Integer.parseInt(tfGradeM2.getText()));
+                        selectedStudentCourse.setFinalExam(Integer.parseInt(tfGradeFinal.getText()));
+                        selectedStudentCourse.setLetterGrade(tfGradeLetter.getText());
+                        boolean updated = manager.updateStudentCourse(selectedStudent, selectedStudentCourse);
+                        if (updated) {
+                            JOptionPane.showMessageDialog(null, "Grade changed!");
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Error occurred!");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Grade not changed!");
+                    }
+                } else {
+                    int result = JOptionPane.showConfirmDialog(null, "Student is not enrolled this course. Are you sure you want to add this student to this course?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        StudentCourse studentCourse = new StudentCourse(selectedCourse.getCourseId(), Integer.parseInt(tfGradeM1.getText()), Integer.parseInt(tfGradeM2.getText()), Integer.parseInt(tfGradeFinal.getText()));
+                        boolean added = manager.addStudentToCourse(selectedStudent, studentCourse);
+                        if (added) {
+                            JOptionPane.showMessageDialog(null, "Student enrolled!");
+                            lbStudentCourseStatus.setText("Student is already enrolled in this course!");
+                            lbStudentCourseStatus.setForeground(Color.green);
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Error occurred!");
+                        }
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Grade not changed!");
+                    }
+                }
+            }
+        });
+
+        comboBoxCourseGrades.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setCourseGradeList(instructor, "");
+            }
+        });
+
+        tfCourseGradesStudentName.addKeyListener(new KeyAdapter() {
+            public void keyReleased(KeyEvent e) {
+                setCourseGradeList(instructor, tfCourseGradesStudentName.getText());
+            }
+        });
+    }
+
+    public void setData() {
+        tfGradeM1.setText("");
+        tfGradeM2.setText("");
+        tfGradeFinal.setText("");
+        tfGradeLetter.setText("");
+        Student selectedStudent = (Student) comboBoxGradeStudent.getSelectedItem();
+        Course selectedCourse = (Course) comboBoxGradeCourse.getSelectedItem();
+        DatabaseManager manager = DatabaseManager.getInstance();
+        manager.getStudentCourses(selectedStudent);
+        if (selectedStudent != null && selectedCourse != null) {
+            for (StudentCourse studentCourse : selectedStudent.getCourses()) {
+                if (studentCourse.getCourseId().equalsIgnoreCase(selectedCourse.getCourseId())) {
+                    lbStudentCourseStatus.setText("Student is already enrolled in this course!");
+                    lbStudentCourseStatus.setForeground(Color.green);
+                    tfGradeM1.setText(String.valueOf(studentCourse.getMidterm1()));
+                    tfGradeM2.setText(String.valueOf(studentCourse.getMidterm2()));
+                    tfGradeFinal.setText(String.valueOf(studentCourse.getFinalExam()));
+                    if (tfGradeM1.getText().equals("") || tfGradeM2.getText().equals("") || tfGradeFinal.getText().equals("")) {
+                        tfGradeLetter.setText("");
+                    } else {
+                        try {
+                            int midterm1 = Integer.parseInt(tfGradeM1.getText());
+                            int midterm2 = Integer.parseInt(tfGradeM2.getText());
+                            int finalExam = Integer.parseInt(tfGradeFinal.getText());
+                            studentCourse.setMidterm1(midterm1);
+                            studentCourse.setMidterm2(midterm2);
+                            studentCourse.setFinalExam(finalExam);
+                            studentCourse.calculateGrade(selectedCourse);
+                            tfGradeLetter.setText(studentCourse.getLetterGrade());
+                        } catch (NumberFormatException ex) {
+                            JOptionPane.showMessageDialog(null, "Please enter valid exam results!");
+                        }
+                    }
+                    break;
+                } else {
+                    lbStudentCourseStatus.setText("Student is not enrolled in this course!");
+                    lbStudentCourseStatus.setForeground(Color.red);
+                }
+            }
+            if (selectedStudent.getCourses().size() == 0) {
+                lbStudentCourseStatus.setText("Student is not enrolled in any course!");
+                lbStudentCourseStatus.setForeground(Color.blue);
+            }
+        } else {
+            System.out.println("Please select a student and a course!");
+        }
+    }
+
+    public void setTfGradeLetter() {
+        if (tfGradeM1.getText().equals("") || tfGradeM2.getText().equals("") || tfGradeFinal.getText().equals("")) {
+            tfGradeLetter.setText("");
+        } else {
+            int midterm1 = Integer.parseInt(tfGradeM1.getText());
+            int midterm2 = Integer.parseInt(tfGradeM2.getText());
+            int finalGrade = Integer.parseInt(tfGradeFinal.getText());
+            Course selectedCourse = (Course) comboBoxGradeCourse.getSelectedItem();
+            tfGradeLetter.setText(StudentCourse.calculateGrade(selectedCourse, midterm1, midterm2, finalGrade));
+        }
+    }
+
+    public void setCourseGradeList(Instructor instructor, String searchName) {
+        DatabaseManager manager = DatabaseManager.getInstance();
+        ArrayList<Student> students = manager.getStudents(instructor.getUniversity().getId());
+        ArrayList<CourseGradesTableModelObject> objectsToAdd = new ArrayList<>();
+        for (Student s : students) {
+            manager.getStudentCourses(s);
+            for (StudentCourse sc : s.getCourses()) {
+                if (sc.getCourseId().equalsIgnoreCase(((Course) comboBoxCourseGrades.getSelectedItem()).getCourseId()) && s.getName().toLowerCase().contains(searchName.toLowerCase())) {
+                    objectsToAdd.add(new CourseGradesTableModelObject(s, sc));
+                }
+            }
+        }
+
+        CourseGradesTableModel cgtm = new CourseGradesTableModel(instructor, objectsToAdd);
+        tableCourseGrades.setModel(cgtm);
     }
 }

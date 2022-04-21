@@ -8,6 +8,7 @@ public class Student extends User {
     private String expireAt;
     private ArrayList<StudentCourse> courses;
     private String department;
+
     public Student(String name, String surname, String email, String phone, String address, String password, boolean status, String createdAt, String updatedAt, String role, long id, float gpa, int totalCredits, String major, String expireAt, University university, String department) {
         super(name, surname, email, phone, address, password, status, createdAt, updatedAt, role, id, university);
         this.gpa = gpa;

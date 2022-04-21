@@ -138,11 +138,12 @@ public class DatabaseManager {
             userStatement.setLong(11, instructor.getId());
             userStatement.setLong(12, instructor.getUniversity().getId());
             userStatement.executeUpdate();
-            PreparedStatement instructorStatement = connection.prepareStatement("INSERT INTO instructors (prefix, office_no, department, id) VALUES (?, ?, ?, ?)");
+            PreparedStatement instructorStatement = connection.prepareStatement("INSERT INTO instructors (prefix, office_no, department, id, university_id) VALUES (?, ?, ?, ?,?)");
             instructorStatement.setString(1, instructor.getPrefix());
             instructorStatement.setString(2, instructor.getOffice());
             instructorStatement.setString(3, instructor.getDepartment());
             instructorStatement.setLong(4, instructor.getId());
+            instructorStatement.setLong(5, instructor.getUniversity().getId());
             instructorStatement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
@@ -157,7 +158,7 @@ public class DatabaseManager {
             statement.setLong(1, student.getId());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                StudentCourse studentCourse = new StudentCourse(resultSet.getInt("course_id"), resultSet.getInt("midterm1"), resultSet.getInt("midterm2"), resultSet.getInt("final"));
+                StudentCourse studentCourse = new StudentCourse(resultSet.getString("course_id"), resultSet.getInt("midterm1"), resultSet.getInt("midterm2"), resultSet.getInt("final"));
                 student.addStudentCourse(studentCourse);
             }
         } catch (Exception e) {
@@ -271,6 +272,10 @@ public class DatabaseManager {
             statement.setLong(8, course.getInstructor().getUniversity().getId());
             statement.setString(9, selectedCourse);
             statement.executeUpdate();
+            PreparedStatement statement2 = connection.prepareStatement("UPDATE s_courses SET course_id=? WHERE course_id=?");
+            statement2.setString(1, course.getCourseId());
+            statement2.setString(2, selectedCourse);
+            statement2.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -357,6 +362,38 @@ public class DatabaseManager {
             PreparedStatement studentStatement = connection.prepareStatement("DELETE FROM students WHERE id=?");
             studentStatement.setLong(1, student.getId());
             studentStatement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean updateStudentCourse(Student student, StudentCourse studentCourse) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("UPDATE s_courses SET midterm1=?, midterm2=?, final=? WHERE student_id=? AND course_id=?");
+            statement.setInt(1, studentCourse.getMidterm1());
+            statement.setInt(2, studentCourse.getMidterm2());
+            statement.setInt(3, studentCourse.getFinalExam());
+            statement.setLong(4, student.getId());
+            statement.setString(5, studentCourse.getCourseId());
+            statement.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addStudentToCourse(Student student, StudentCourse studentCourse) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO s_courses (student_id, course_id, midterm1, midterm2, final) VALUES (?, ?, ?, ?, ?)");
+            statement.setLong(1, student.getId());
+            statement.setString(2, studentCourse.getCourseId());
+            statement.setInt(3, studentCourse.getMidterm1());
+            statement.setInt(4, studentCourse.getMidterm2());
+            statement.setInt(5, studentCourse.getFinalExam());
+            statement.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
