@@ -882,45 +882,49 @@ public class mainForm extends JFrame {
         btnGradeChange.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                Student selectedStudent = (Student) comboBoxGradeStudent.getSelectedItem();
-                Course selectedCourse = (Course) comboBoxGradeCourse.getSelectedItem();
-                StudentCourse selectedStudentCourse = null;
-                for (StudentCourse studentCourse : selectedStudent.getCourses()) {
-                    if (studentCourse.getCourseId().equalsIgnoreCase(selectedCourse.getCourseId())) {
-                        selectedStudentCourse = studentCourse;
-                        break;
-                    }
-                }
-                if (selectedStudentCourse != null) {
-                    int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to change grade for " + selectedStudent.getName() + " in " + selectedCourse.getCourseName() + "?", "Confirm", JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        selectedStudentCourse.setMidterm1(Integer.parseInt(tfGradeM1.getText()));
-                        selectedStudentCourse.setMidterm2(Integer.parseInt(tfGradeM2.getText()));
-                        selectedStudentCourse.setFinalExam(Integer.parseInt(tfGradeFinal.getText()));
-                        selectedStudentCourse.setLetterGrade(tfGradeLetter.getText());
-                        boolean updated = manager.updateStudentCourse(selectedStudent, selectedStudentCourse);
-                        if (updated) {
-                            JOptionPane.showMessageDialog(null, "Grade changed!");
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Error occurred!");
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Grade not changed!");
-                    }
+                if (tfGradeM1.getText().equals("") || tfGradeM2.getText().equals("") || tfGradeFinal.getText().equals("")) {
+                    JOptionPane.showMessageDialog(null, "Please fill all the grades!");
                 } else {
-                    int result = JOptionPane.showConfirmDialog(null, "Student is not enrolled this course. Are you sure you want to add this student to this course?", "Confirm", JOptionPane.YES_NO_OPTION);
-                    if (result == JOptionPane.YES_OPTION) {
-                        StudentCourse studentCourse = new StudentCourse(selectedCourse.getCourseId(), Integer.parseInt(tfGradeM1.getText()), Integer.parseInt(tfGradeM2.getText()), Integer.parseInt(tfGradeFinal.getText()));
-                        boolean added = manager.addStudentToCourse(selectedStudent, studentCourse);
-                        if (added) {
-                            JOptionPane.showMessageDialog(null, "Student enrolled!");
-                            lbStudentCourseStatus.setText("Student is already enrolled in this course!");
-                            lbStudentCourseStatus.setForeground(Color.green);
+                    Student selectedStudent = (Student) comboBoxGradeStudent.getSelectedItem();
+                    Course selectedCourse = (Course) comboBoxGradeCourse.getSelectedItem();
+                    StudentCourse selectedStudentCourse = null;
+                    for (StudentCourse studentCourse : selectedStudent.getCourses()) {
+                        if (studentCourse.getCourseId().equalsIgnoreCase(selectedCourse.getCourseId())) {
+                            selectedStudentCourse = studentCourse;
+                            break;
+                        }
+                    }
+                    if (selectedStudentCourse != null) {
+                        int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to change grade for " + selectedStudent.getName() + " in " + selectedCourse.getCourseName() + "?", "Confirm", JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.YES_OPTION) {
+                            selectedStudentCourse.setMidterm1(Integer.parseInt(tfGradeM1.getText()));
+                            selectedStudentCourse.setMidterm2(Integer.parseInt(tfGradeM2.getText()));
+                            selectedStudentCourse.setFinalExam(Integer.parseInt(tfGradeFinal.getText()));
+                            selectedStudentCourse.setLetterGrade(tfGradeLetter.getText());
+                            boolean updated = manager.updateStudentCourse(selectedStudent, selectedStudentCourse);
+                            if (updated) {
+                                JOptionPane.showMessageDialog(null, "Grade changed!");
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Error occurred!");
+                            }
                         } else {
-                            JOptionPane.showMessageDialog(null, "Error occurred!");
+                            JOptionPane.showMessageDialog(null, "Grade not changed!");
                         }
                     } else {
-                        JOptionPane.showMessageDialog(null, "Grade not changed!");
+                        int result = JOptionPane.showConfirmDialog(null, "Student is not enrolled this course. Are you sure you want to add this student to this course?", "Confirm", JOptionPane.YES_NO_OPTION);
+                        if (result == JOptionPane.YES_OPTION) {
+                            StudentCourse studentCourse = new StudentCourse(selectedCourse.getCourseId(), Integer.parseInt(tfGradeM1.getText()), Integer.parseInt(tfGradeM2.getText()), Integer.parseInt(tfGradeFinal.getText()));
+                            boolean added = manager.addStudentToCourse(selectedStudent, studentCourse);
+                            if (added) {
+                                JOptionPane.showMessageDialog(null, "Student enrolled!");
+                                lbStudentCourseStatus.setText("Student is already enrolled in this course!");
+                                lbStudentCourseStatus.setForeground(Color.green);
+                            } else {
+                                JOptionPane.showMessageDialog(null, "Error occurred!");
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Grade not changed!");
+                        }
                     }
                 }
             }
@@ -1004,10 +1008,12 @@ public class mainForm extends JFrame {
         DatabaseManager manager = DatabaseManager.getInstance();
         ArrayList<Student> students = manager.getStudents(instructor.getUniversity().getId());
         ArrayList<CourseGradesTableModelObject> objectsToAdd = new ArrayList<>();
+        Course selectedCourse = (Course) comboBoxCourseGrades.getSelectedItem();
         for (Student s : students) {
             manager.getStudentCourses(s);
             for (StudentCourse sc : s.getCourses()) {
-                if (sc.getCourseId().equalsIgnoreCase(((Course) comboBoxCourseGrades.getSelectedItem()).getCourseId()) && s.getName().toLowerCase().contains(searchName.toLowerCase())) {
+                if (sc.getCourseId().equalsIgnoreCase(selectedCourse.getCourseId()) && s.getName().toLowerCase().contains(searchName.toLowerCase())) {
+                    sc.calculateGrade(selectedCourse);
                     objectsToAdd.add(new CourseGradesTableModelObject(s, sc));
                 }
             }

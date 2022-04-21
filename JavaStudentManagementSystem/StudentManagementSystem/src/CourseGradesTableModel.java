@@ -10,8 +10,9 @@ public class CourseGradesTableModel extends AbstractTableModel {
     private static final int STUDENT_MIDTERM1_COL = 4;
     private static final int STUDENT_MIDTERM2_COL = 5;
     private static final int STUDENT_FINAL_COL = 6;
+    private static final int STUDENT_LETTER_GRADE_COL = 7;
 
-    private String[] columnNames = {"Course ID", "Student ID", "Name", "Surname", "Midterm 1", "Midterm 2", "Final"};
+    private String[] columnNames = {"Course ID", "Student ID", "Name", "Surname", "Midterm 1", "Midterm 2", "Final", "Letter Grade"};
     private ArrayList<CourseGradesTableModelObject> objects;
     private Instructor instructor;
 
@@ -58,6 +59,8 @@ public class CourseGradesTableModel extends AbstractTableModel {
                 return object.getStudentCourse().getMidterm2();
             case STUDENT_FINAL_COL:
                 return object.getStudentCourse().getFinalExam();
+            case STUDENT_LETTER_GRADE_COL:
+                return object.getStudentCourse().getLetterGrade();
             default:
                 return object.getStudentCourse().getCourseId();
         }
