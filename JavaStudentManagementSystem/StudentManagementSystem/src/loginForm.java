@@ -130,21 +130,7 @@ public class loginForm extends JFrame{
         btnLogSignIn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (tfLogUser.getText().equals("") || pfLogPassword.getText().equals("")) {
-                    JOptionPane.showMessageDialog(null, "Please fill all fields", "Error", JOptionPane.ERROR_MESSAGE);
-                } else {
-                    User u1 = manager.checkUser(Long.parseLong(tfLogUser.getText()), pfLogPassword.getText(), ((University)comboBoxUniversity.getSelectedItem()).getId());
-                    if (u1 != null) {
-                        if (u1.getStatus()) {
-                            loginForm.this.dispose();
-                            new mainForm(u1);
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Your account is not active yet. Please contact the administrator.");
-                        }
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Check your id or password.");
-                    }
-                }
+                login();
             }
         });
         btnClear.addActionListener(new ActionListener() {
@@ -238,10 +224,34 @@ public class loginForm extends JFrame{
                 }
             }
         });
+        pfLogPassword.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                login();
+            }
+        });
     }
 
     public static void main(String[] args) {
         manager = new DatabaseManager();
         new loginForm();
+    }
+
+    void login() {
+        if (tfLogUser.getText().equals("") || pfLogPassword.getText().equals("")) {
+            JOptionPane.showMessageDialog(null, "Please fill all fields", "Error", JOptionPane.ERROR_MESSAGE);
+        } else {
+            User u1 = manager.checkUser(Long.parseLong(tfLogUser.getText()), pfLogPassword.getText(), ((University)comboBoxUniversity.getSelectedItem()).getId());
+            if (u1 != null) {
+                if (u1.getStatus()) {
+                    loginForm.this.dispose();
+                    new mainForm(u1);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Your account is not active yet. Please contact the administrator.");
+                }
+            } else {
+                JOptionPane.showMessageDialog(null, "Check your id or password.");
+            }
+        }
     }
 }

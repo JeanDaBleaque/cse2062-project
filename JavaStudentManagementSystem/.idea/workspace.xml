@@ -39,10 +39,11 @@
     <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.SHOW" value="true" />
     <property name="UI_DESIGNER_EDITOR_MODE.UIDesignerToolWindowManager.WIDTH" value="272" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/StudentManagementSystem/src/images" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/StudentManagementSystem/mysql-connector-java-8.0.28.jar" />
     <property name="project.structure.last.edited" value="Modules" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -83,7 +84,7 @@
       <workItem from="1650509733902" duration="8519000" />
       <workItem from="1650553761696" duration="76000" />
       <workItem from="1650553885241" duration="14598000" />
-      <workItem from="1650571167210" duration="569000" />
+      <workItem from="1650571167210" duration="2221000" />
     </task>
     <servers />
   </component>
