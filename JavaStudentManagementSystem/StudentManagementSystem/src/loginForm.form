@@ -137,7 +137,7 @@
                     <properties>
                       <background color="-8750470"/>
                       <font name="Franklin Gothic Medium" size="14" style="1"/>
-                      <foreground color="-2236963"/>
+                      <foreground color="-13355980"/>
                       <text value="Sign In"/>
                     </properties>
                   </component>
@@ -148,7 +148,7 @@
                     <properties>
                       <background color="-8750470"/>
                       <font name="Franklin Gothic Medium" size="14" style="1"/>
-                      <foreground color="-2236963"/>
+                      <foreground color="-13355980"/>
                       <text value="Clear"/>
                     </properties>
                   </component>
@@ -788,7 +788,7 @@
                     </constraints>
                     <properties>
                       <foreground color="-1513240"/>
-                      <text value="Muhammed Taha Kibar"/>
+                      <text value="Mustafa Taha Kabar"/>
                     </properties>
                   </component>
                   <component id="239a6" class="javax.swing.JLabel">
@@ -797,7 +797,7 @@
                     </constraints>
                     <properties>
                       <foreground color="-1513240"/>
-                      <text value="Metin Molak"/>
+                      <text value="Muhammed Metin Molak"/>
                     </properties>
                   </component>
                   <component id="9c473" class="javax.swing.JLabel">
@@ -806,7 +806,7 @@
                     </constraints>
                     <properties>
                       <foreground color="-1513240"/>
-                      <text value="Cihan"/>
+                      <text value="Cihan Turan"/>
                     </properties>
                   </component>
                 </children>

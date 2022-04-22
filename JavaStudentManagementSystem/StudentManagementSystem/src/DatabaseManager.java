@@ -4,7 +4,7 @@ import java.util.ArrayList;
 @SuppressWarnings("ALL")
 public class DatabaseManager {
     private static final String userName = "root";
-    private static final String password = "669445";
+    private static final String password = "Sertan1602-A0216-";
     private static final String dbUrl = "jdbc:mysql://localhost:3306/cse2062";
     private Connection connection = null;
     private static DatabaseManager instance;

@@ -1,7 +1,6 @@
 import javax.swing.*;
 import javax.swing.text.DefaultFormatterFactory;
 import javax.swing.text.NumberFormatter;
-import javax.xml.crypto.Data;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.NumberFormat;
@@ -115,6 +114,20 @@ public class mainForm extends JFrame {
     private JTextField tfCourseGradesStudentName;
     private JComboBox comboBoxCourseGrades;
     private JTable tableCourseGrades;
+    private JPanel sidePnlPrefix;
+    private JPanel pnlCourseListSearch;
+    private JScrollPane pnlScrollCourseList;
+    private JScrollPane pnlScrollCourseDel;
+    private JPanel pnlCourseDelSearch;
+    private JPanel pnlBtnDelCourseDel;
+    private JScrollPane pnlScrollStudentList;
+    private JPanel pnlStudentListSearch;
+    private JScrollPane pnlScrollStudentDel;
+    private JPanel pnlStudentDelSearch;
+    private JPanel pnlBtnStuDel;
+    private JScrollPane pnlScrollCourseGradeSt;
+    private JPanel pnlCourseGradeSearch;
+    private JPanel pnlCourseGradeCourse;
     private JScrollPane table;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
