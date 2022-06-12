@@ -79,6 +79,30 @@ public class StudentCourse {
         }
     }
 
+    public float getGrade() {
+        float grade = 0;
+        if (getLetterGrade().equals("AA")) {
+            grade = 4.0f;
+        } else if (getLetterGrade().equals("BA")) {
+            grade = 3.5f;
+        } else if (getLetterGrade().equals("BB")) {
+            grade = 3f;
+        } else if (getLetterGrade().equals("CB")) {
+            grade = 2.5f;
+        } else if (getLetterGrade().equals("CC")) {
+            grade = 2f;
+        } else if (getLetterGrade().equals("DC")) {
+            grade = 1.5f;
+        } else if (getLetterGrade().equals("DD")) {
+            grade = 1f;
+        } else if (getLetterGrade().equals("FD")) {
+            grade = 0.0f;
+        } else if (getLetterGrade().equals("FF")) {
+            grade = 0.0f;
+        }
+        return grade;
+    }
+
     public static String calculateGrade(Course course, int midterm1, int midterm2, int finalExam) {
         float grade = course.getpM1()*midterm1+course.getpM2()*midterm2+course.getpFinal()*finalExam;
         if (grade >= 90) {

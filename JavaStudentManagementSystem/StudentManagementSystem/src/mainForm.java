@@ -128,6 +128,7 @@ public class mainForm extends JFrame {
     private JScrollPane pnlScrollCourseGradeSt;
     private JPanel pnlCourseGradeSearch;
     private JPanel pnlCourseGradeCourse;
+    private JButton btnUnrollStudent;
     private JScrollPane table;
     private Color sideBarColorHover = new Color(96, 96, 96);
     private Color sideBarColorNormal = new Color(72, 72, 72);
@@ -136,10 +137,11 @@ public class mainForm extends JFrame {
     private CardLayout c1 = (CardLayout) pnlMain.getLayout();
     private CardLayout c2 = (CardLayout) pnlCourseMain.getLayout();
     private CardLayout c3 = (CardLayout) pnlStudentMain.getLayout();
-
+    private boolean isEnrolled = false;
     public mainForm(User u1) {
         Instructor instructor = (Instructor) u1;
         DatabaseManager manager = DatabaseManager.getInstance();
+        manager.updateAllStudentData();
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (ClassNotFoundException e) {
@@ -153,7 +155,6 @@ public class mainForm extends JFrame {
         }
         lbPrefix.setText(((Instructor) u1).getPrefix());
         lbNameSide.setText(u1.getName() + " " + u1.getSurname());
-        System.out.println(u1.getId());
         try {
             imgPhoto.setIcon(new ImageIcon(new ImageIcon(Objects.requireNonNull(this.getClass().getResource(u1.getId() + ".png"))).getImage().getScaledInstance(120, 120, Image.SCALE_DEFAULT)));
         } catch (Exception e) {
@@ -955,6 +956,19 @@ public class mainForm extends JFrame {
                 setCourseGradeList(instructor, tfCourseGradesStudentName.getText());
             }
         });
+        btnUnrollStudent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (isEnrolled) {
+                    int result = JOptionPane.showConfirmDialog(null, "Are you sure you want to unroll this student from this course?", "Confirm", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        Student selectedStudent = (Student) comboBoxGradeStudent.getSelectedItem();
+                        Course selectedCourse = (Course) comboBoxGradeCourse.getSelectedItem();
+                        boolean unrolled = manager.unrollStudent(selectedStudent, selectedCourse);
+                    }
+                }
+            }
+        });
     }
 
     public void setData() {
@@ -969,6 +983,8 @@ public class mainForm extends JFrame {
         if (selectedStudent != null && selectedCourse != null) {
             for (StudentCourse studentCourse : selectedStudent.getCourses()) {
                 if (studentCourse.getCourseId().equalsIgnoreCase(selectedCourse.getCourseId())) {
+                    btnUnrollStudent.setEnabled(true);
+                    isEnrolled = true;
                     lbStudentCourseStatus.setText("Student is already enrolled in this course!");
                     lbStudentCourseStatus.setForeground(Color.green);
                     tfGradeM1.setText(String.valueOf(studentCourse.getMidterm1()));
@@ -992,11 +1008,15 @@ public class mainForm extends JFrame {
                     }
                     break;
                 } else {
+                    btnUnrollStudent.setEnabled(false);
+                    isEnrolled = false;
                     lbStudentCourseStatus.setText("Student is not enrolled in this course!");
                     lbStudentCourseStatus.setForeground(Color.red);
                 }
             }
             if (selectedStudent.getCourses().size() == 0) {
+                btnUnrollStudent.setEnabled(false);
+                isEnrolled = false;
                 lbStudentCourseStatus.setText("Student is not enrolled in any course!");
                 lbStudentCourseStatus.setForeground(Color.blue);
             }

@@ -4,7 +4,7 @@ import java.util.ArrayList;
 @SuppressWarnings("ALL")
 public class DatabaseManager {
     private static final String userName = "root";
-    private static final String password = "Sertan1602-A0216-";
+    private static final String password = "669445";
     private static final String dbUrl = "jdbc:mysql://localhost:3306/cse2062";
     private Connection connection = null;
     private static DatabaseManager instance;
@@ -154,8 +154,9 @@ public class DatabaseManager {
 
     public void getStudentCourses(Student student) {
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM s_courses WHERE student_id=?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM s_courses WHERE student_id=? AND university_id=?");
             statement.setLong(1, student.getId());
+            statement.setLong(2, student.getUniversity().getId());
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
                 StudentCourse studentCourse = new StudentCourse(resultSet.getString("course_id"), resultSet.getInt("midterm1"), resultSet.getInt("midterm2"), resultSet.getInt("final"));
@@ -219,9 +220,15 @@ public class DatabaseManager {
 
     public boolean deleteCourse(Course courseToDel) {
         try {
-            PreparedStatement statement = connection.prepareStatement("DELETE FROM courses WHERE course_id=?");
-            statement.setString(1, courseToDel.getCourseId());
-            statement.executeUpdate();
+            PreparedStatement courseStatement = connection.prepareStatement("DELETE FROM courses WHERE course_id=? AND university_id=?");
+            courseStatement.setString(1, courseToDel.getCourseId());
+            courseStatement.setLong(2, courseToDel.getInstructor().getUniversity().getId());
+            courseStatement.executeUpdate();
+            PreparedStatement studentCourseStatement = connection.prepareStatement("DELETE FROM s_courses WHERE course_id=? AND university_id=?");
+            studentCourseStatement.setString(1, courseToDel.getCourseId());
+            studentCourseStatement.setLong(2, courseToDel.getInstructor().getUniversity().getId());
+            studentCourseStatement.executeUpdate();
+            updateAllStudentData();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -272,10 +279,12 @@ public class DatabaseManager {
             statement.setLong(8, course.getInstructor().getUniversity().getId());
             statement.setString(9, selectedCourse);
             statement.executeUpdate();
-            PreparedStatement statement2 = connection.prepareStatement("UPDATE s_courses SET course_id=? WHERE course_id=?");
+            PreparedStatement statement2 = connection.prepareStatement("UPDATE s_courses SET course_id=? WHERE course_id=? AND university_id=?");
             statement2.setString(1, course.getCourseId());
             statement2.setString(2, selectedCourse);
+            statement2.setLong(3, course.getInstructor().getUniversity().getId());
             statement2.executeUpdate();
+            updateAllStudentData();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -371,13 +380,15 @@ public class DatabaseManager {
 
     public boolean updateStudentCourse(Student student, StudentCourse studentCourse) {
         try {
-            PreparedStatement statement = connection.prepareStatement("UPDATE s_courses SET midterm1=?, midterm2=?, final=? WHERE student_id=? AND course_id=?");
+            PreparedStatement statement = connection.prepareStatement("UPDATE s_courses SET midterm1=?, midterm2=?, final=? WHERE student_id=? AND course_id=? AND university_id=?");
             statement.setInt(1, studentCourse.getMidterm1());
             statement.setInt(2, studentCourse.getMidterm2());
             statement.setInt(3, studentCourse.getFinalExam());
             statement.setLong(4, student.getId());
             statement.setString(5, studentCourse.getCourseId());
+            statement.setLong(6, student.getUniversity().getId());
             statement.executeUpdate();
+            updateAllStudentData();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
@@ -387,17 +398,75 @@ public class DatabaseManager {
 
     public boolean addStudentToCourse(Student student, StudentCourse studentCourse) {
         try {
-            PreparedStatement statement = connection.prepareStatement("INSERT INTO s_courses (student_id, course_id, midterm1, midterm2, final) VALUES (?, ?, ?, ?, ?)");
+            PreparedStatement statement = connection.prepareStatement("INSERT INTO s_courses (student_id, course_id, midterm1, midterm2, final, university_id) VALUES (?, ?, ?, ?, ?, ?)");
             statement.setLong(1, student.getId());
             statement.setString(2, studentCourse.getCourseId());
             statement.setInt(3, studentCourse.getMidterm1());
             statement.setInt(4, studentCourse.getMidterm2());
             statement.setInt(5, studentCourse.getFinalExam());
+            statement.setLong(6, student.getUniversity().getId());
             statement.executeUpdate();
+            updateAllStudentData();
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
         return true;
+    }
+
+    public boolean unrollStudent(Student student, Course course) {
+        try {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM s_courses WHERE student_id=? AND course_id=? AND university_id=?");
+            statement.setLong(1, student.getId());
+            statement.setString(2, course.getCourseId());
+            statement.setLong(3, student.getUniversity().getId());
+            statement.executeUpdate();
+            updateAllStudentData();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public void updateAllStudentData() {
+        ArrayList<University> universities = getUniversities();
+        ArrayList<Student> students = new ArrayList<>();
+        ArrayList<Instructor> instructors = new ArrayList<>();
+        ArrayList<Course> courses = new ArrayList<>();
+        for (University university : universities) {
+            ArrayList<Student> universityStudents = getStudents(university.getId());
+            for (Instructor instructor : getInstructors(university.getId())) {
+                instructors.add(instructor);
+                getCourses(instructor);
+                for (Course course : instructor.getCourses()) {
+                    courses.add(course);
+                }
+            }
+            for (Student student : universityStudents) {
+                students.add(student);
+                getStudentCourses(student);
+            }
+        }
+
+        for (Student student : students) {
+            float sum = 0;
+            student.setGpa(0);
+            student.setTotalCredits(0);
+            for (Course course : courses) {
+                for (StudentCourse studentCourse : student.getCourses()) {
+                    if (studentCourse.getCourseId().equals(course.getCourseId()) && student.getUniversity().getId() == student.getUniversity().getId()) {
+                        student.setTotalCredits(student.getTotalCredits() + course.getCredit());
+                        studentCourse.calculateGrade(course);
+                        sum += studentCourse.getGrade()*course.getCredit();
+                    }
+                }
+            }
+            sum = sum/student.getTotalCredits();
+            student.setGpa(sum);
+        }
+        for (Student student : students) {
+            updateStudent(student);
+        }
     }
 }
